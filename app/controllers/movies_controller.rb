@@ -8,9 +8,26 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.all_ratings
-    params[:sort_by] ||= (session[:sort_by] ||= 'id')
-    params[:ratings] ||= (session[:ratings] ||= Hash[@all_ratings.map { |x| [x, 0]}])
+    to_be_redirected = false
+    
+    session[:sort_by] ||= 'id'
+    unless params[:sort_by]
+      params[:sort_by] = session[:sort_by]
+      to_be_redirected = true
+    end
+
+    session[:ratings] ||= Hash[@all_ratings.map { |x| [x, 0]}]
+    unless params[:ratings]
+      params[:ratings] = session[:ratings]
+      to_be_redirected = true
+    end
+
     session[:sort_by], session[:ratings] = params[:sort_by], params[:ratings]
+
+    if to_be_redirected == true
+      flash.keep
+      redirect_to :action => 'index', :sort_by => params[:sort_by], :ratings => params[:ratings]
+    end
 
     @sort_by = params[:sort_by]
     @ratings_filter = params[:ratings].keys
