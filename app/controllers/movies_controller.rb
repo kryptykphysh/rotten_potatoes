@@ -7,12 +7,16 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @sort_by = params[:sort_by] if params[:sort_by]
-    if params[:sort_by]
-      @movies = Movie.find(:all, :order => "#{params[:sort_by]} ASC")
-    else
-      @movies = Movie.all
-    end
+    @all_ratings = Movie.all_ratings
+    params[:sort_by] ||= (session[:sort_by] ||= 'id')
+    params[:ratings] ||= (session[:ratings] ||= Hash[@all_ratings.map { |x| [x, 0]}])
+    session[:sort_by], session[:ratings] = params[:sort_by], params[:ratings]
+
+    @sort_by = params[:sort_by]
+    @ratings_filter = params[:ratings].keys
+    @movies = Movie.find(:all,
+      :conditions => ["rating IN (?)", @ratings_filter],
+      :order => "#{params[:sort_by]} ASC")
   end
 
   def new
