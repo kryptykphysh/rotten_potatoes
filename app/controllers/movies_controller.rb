@@ -7,6 +7,7 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @sort_by = params[:sort_by] if params[:sort_by]
     if params[:sort_by]
       @movies = Movie.find(:all, :order => "#{params[:sort_by]} ASC")
     else
